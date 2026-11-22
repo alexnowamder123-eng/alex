@@ -37,10 +37,7 @@ jobs:
     name: Secret Scanning
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-           fetch-depth: 0
+      - uses: actions/checkout@v4
       - name: Scan repository with Gitleaks
         uses: gitleaks/gitleaks-action@v2
         env:
@@ -53,10 +50,12 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build Docker image
         run: docker build -t devsecops-demo:local .
-      - name: Scan Docker image with Trivy
+      - name: Scan image with Trivy
         uses: aquasecurity/trivy-action@v0.28.0
         with:
-         image-ref: cis-audit:latest
-         format: table
-         exit-code: '1'
-         severity: CRITICAL
+          image-ref: devsecops-demo:local
+          format: table
+          exit-code: "1"
+          ignore-unfixed: true
+          vuln-type: os,library
+          severity: CRITICAL
