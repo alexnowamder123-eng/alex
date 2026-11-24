@@ -1,0 +1,11 @@
+{
+  "image": "cis-audit",
+  "created": "2026-11-22T15:09:00.0477436+07:00",
+  "counts": {
+    "LOW": 83,
+    "HIGH": 54,
+    "MEDIUM": 109,
+    "UNKNOWN": 7
+  },
+  "note": "Original supplied scan; not a controlled before/after baseline."
+}

@@ -1,0 +1,45 @@
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: devsecops-lab
+spec:
+  background: true
+  rules:
+    - name: require-nonroot-and-limits
+      match:
+        any:
+          - resources:
+              kinds: [Pod]
+              namespaces: [devsecops-lab]
+      validate:
+        failureAction: Enforce
+        message: Containers must be non-root, have CPU/memory limits and use a non-latest tag or digest.
+        foreach:
+          - list: request.object.spec.containers
+            pattern:
+              securityContext:
+                runAsNonRoot: true
+              resources:
+                limits:
+                  cpu: '?*'
+                  memory: '?*'
+    - name: disallow-latest-and-implicit-tag
+      match:
+        any:
+          - resources:
+              kinds: [Pod]
+              namespaces: [devsecops-lab]
+      validate:
+        failureAction: Enforce
+        message: Explicit non-latest tag or digest is required.
+        foreach:
+          - list: request.object.spec.containers
+            deny:
+              conditions:
+                any:
+                  - key: "{{ regex_match('^([^@]+@sha256:[a-fA-F0-9]{64}|([^/]+/)*[^/:@]+:[^/:@]+)$', element.image) }}"
+                    operator: Equals
+                    value: false
+                  - key: "{{ regex_match('.*:latest$', element.image) }}"
+                    operator: Equals
+                    value: true
